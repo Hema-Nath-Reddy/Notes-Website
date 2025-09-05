@@ -51,35 +51,35 @@ export default function Starred() {
     <section className="space-y-4">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Starred</h1>
-          <p className="text-neutral-600">Your favorite notes.</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-white">Starred</h1>
+          <p className="text-white/70">Your favorite notes.</p>
         </div>
         <div className="hidden sm:block relative">
-          <SearchIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search notes" className="rounded-lg border border-neutral-300 bg-white pl-8 pr-3 py-2 outline-none focus:border-neutral-500" />
+          <SearchIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search notes" className="rounded-lg glass-input pl-8 pr-3 py-2 outline-none text-white placeholder-white/50" />
         </div>
       </header>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 auto-rows-[8px] grid-flow-row-dense">
         {loading ? (
-          <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">Loading…</div>
+          <div className="rounded-xl glass p-4"><span className="text-white">Loading…</span></div>
         ) : notes.length === 0 ? (
-          <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">No starred notes.</div>
+          <div className="rounded-xl glass p-4"><span className="text-white">No starred notes.</span></div>
         ) : (
           notes.map(n => (
-            <div key={n.id} className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm min-h-[160px]">
+            <div key={n.id} className="rounded-xl glass p-4 min-h-[160px] cursor-pointer hover:bg-white/10 transition-all" onClick={() => navigate(`/notes/${n.id}`)}>
               <div className="flex items-start justify-between gap-2">
-                <h2 className="font-medium truncate">{n.title}</h2>
+                <h2 className="font-medium truncate text-white">{n.title}</h2>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => toggleStar(n.id, false)} title="Unstar" className="rounded-full border p-1 bg-yellow-400 text-black border-yellow-400">
+                  <button onClick={(e) => { e.stopPropagation(); toggleStar(n.id, false); }} title="Unstar" className="rounded-full border p-1 glass-button-primary text-white">
                     <StarOffIcon size={14} />
                   </button>
-                  <button onClick={() => togglePin(n.id, !n.is_pinned)} title={n.is_pinned ? 'Unpin' : 'Pin'} className={`rounded-full border p-1 ${n.is_pinned ? 'bg-black text-white border-black' : 'bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100'}`}>
+                  <button onClick={(e) => { e.stopPropagation(); togglePin(n.id, !n.is_pinned); }} title={n.is_pinned ? 'Unpin' : 'Pin'} className={`rounded-full border p-1 transition-all ${n.is_pinned ? 'glass-button-primary text-white' : 'glass-button text-white hover:bg-white/20'}`}>
                     {n.is_pinned ? <PinOffIcon size={14} /> : <PinIcon size={14} />}
                   </button>
                 </div>
               </div>
-              {n.content && <p className="text-sm text-neutral-600 whitespace-pre-wrap">{n.content}</p>}
+              {n.content && <p className="text-sm text-white/70 whitespace-pre-wrap">{n.content}</p>}
             </div>
           ))
         )}

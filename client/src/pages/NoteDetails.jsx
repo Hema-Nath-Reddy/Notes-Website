@@ -133,7 +133,7 @@ export default function NoteDetails() {
         <div className="space-y-1">
           <button
             onClick={() => navigate("/")}
-            className="cursor-pointer flex items-center gap-2 rounded-lg border border-neutral-300 bg-white p-2 hover:bg-neutral-100"
+            className="cursor-pointer flex items-center gap-2 rounded-lg glass-button p-2 text-white hover:bg-white/20"
           >
             <ChevronsLeft />
             Go Back
@@ -144,7 +144,7 @@ export default function NoteDetails() {
                 setEditingTitle(true);
                 setTempTitle(note.title);
               }}
-              className="text-2xl font-semibold tracking-tight"
+              className="text-2xl font-semibold tracking-tight text-white"
             >
               {note.title}
             </h1>
@@ -154,10 +154,10 @@ export default function NoteDetails() {
               value={tempTitle}
               onChange={(e) => setTempTitle(e.target.value)}
               onBlur={commitTitle}
-              className="cursor-pointer rounded-lg border border-neutral-300 bg-white px-3 py-2 outline-none focus:border-neutral-500"
+              className="cursor-pointer rounded-lg glass-input px-3 py-2 outline-none text-white"
             />
           )}
-          <p className="text-neutral-600">
+          <p className="text-white/70">
             Double click to edit title or content. Use buttons to star/pin or
             delete.
           </p>
@@ -166,7 +166,7 @@ export default function NoteDetails() {
           <button
             onClick={() => save({ is_starred: !note.is_starred })}
             title={note.is_starred ? "Unstar" : "Star"}
-            className="cursor-pointer rounded-lg border border-neutral-300 bg-white p-2 hover:bg-neutral-100"
+            className="cursor-pointer rounded-lg glass-button p-2 text-white hover:bg-white/20"
           >
             {note.is_starred ? (
               <StarOffIcon size={16} />
@@ -177,35 +177,36 @@ export default function NoteDetails() {
           <button
             onClick={() => save({ is_pinned: !note.is_pinned })}
             title={note.is_pinned ? "Unpin" : "Pin"}
-            className="cursor-pointer rounded-lg border border-neutral-300 bg-white p-2 hover:bg-neutral-100"
+            className="cursor-pointer rounded-lg glass-button p-2 text-white hover:bg-white/20"
           >
             {note.is_pinned ? <PinOffIcon size={16} /> : <PinIcon size={16} />}
           </button>
           <button
             onClick={saveAll}
             title="Save"
-            className="cursor-pointer rounded-lg border border-neutral-300 bg-white p-2 hover:bg-neutral-100"
+            className="cursor-pointer rounded-lg glass-button p-2 text-white hover:bg-white/20"
           >
             <SaveIcon size={16} />
           </button>
           <button
             onClick={remove}
             title="Delete"
-            className="cursor-pointer rounded-lg bg-red-600 text-white p-2"
+            className="cursor-pointer rounded-lg glass-button p-2 text-white hover:bg-red-500/20"
+            style={{ background: 'rgba(239, 68, 68, 0.8)', borderColor: 'rgba(239, 68, 68, 0.8)' }}
           >
             <TrashIcon size={16} />
           </button>
         </div>
       </header>
 
-      <article className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm min-h-40">
+      <article className="rounded-xl glass p-4 min-h-40">
         {!editingContent ? (
           <div
             onDoubleClick={() => {
               setEditingContent(true);
               setTempContent(note.content || "");
             }}
-            className="whitespace-pre-wrap"
+            className="whitespace-pre-wrap text-white"
           >
             {note.content || "—"}
           </div>
@@ -216,19 +217,19 @@ export default function NoteDetails() {
             onChange={(e) => setTempContent(e.target.value)}
             onBlur={commitContent}
             rows={8}
-            className="cursor-pointer w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 outline-none focus:border-neutral-500"
+            className="cursor-pointer w-full rounded-lg glass-input px-3 py-2 outline-none text-white placeholder-white/50"
           />
         )}
       </article>
 
       <section className="space-y-2">
-        <div className="text-sm font-medium">Tags</div>
+        <div className="text-sm font-medium text-white">Tags</div>
         <div className="flex flex-wrap gap-2">
           {tags.map((t) => (
             <button
               key={t.id}
               onClick={() => unlinkTag(t.id)}
-              className="cursor-pointer rounded-full border px-3 py-1 text-sm bg-white border-neutral-300 hover:bg-neutral-100"
+              className="cursor-pointer rounded-full border px-3 py-1 text-sm glass-button text-white hover:bg-white/20"
             >
               {t.name} ×
             </button>
@@ -237,7 +238,7 @@ export default function NoteDetails() {
         <div className="flex gap-2">
           <select
             onChange={(e) => e.target.value && linkTags([e.target.value])}
-            className="cursor-pointer rounded-lg border border-neutral-300 bg-white px-3 py-2 outline-none focus:border-neutral-500"
+            className="cursor-pointer rounded-lg glass-input px-3 py-2 outline-none text-white"
           >
             <option value="">Add existing tag…</option>
             {allTags
@@ -252,11 +253,11 @@ export default function NoteDetails() {
             value={newTag}
             onChange={(e) => setNewTag(e.target.value)}
             placeholder="New tag"
-            className="cursor-pointer flex-1 rounded-lg border border-neutral-300 bg-white px-3 py-2 outline-none focus:border-neutral-500"
+            className="cursor-pointer flex-1 rounded-lg glass-input px-3 py-2 outline-none text-white placeholder-white/50"
           />
           <button
             onClick={createTag}
-            className="cursor-pointer  rounded-lg border border-neutral-300 bg-white px-3 py-2 hover:bg-neutral-100"
+            className="cursor-pointer rounded-lg glass-button px-3 py-2 text-white hover:bg-white/20"
           >
             Create
           </button>

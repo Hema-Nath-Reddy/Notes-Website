@@ -75,57 +75,57 @@ export default function Tags() {
     <section className="space-y-4">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Tags</h1>
-          <p className="text-neutral-600">Organize your notes with tags.</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-white">Tags</h1>
+          <p className="text-white/70">Organize your notes with tags.</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="hidden sm:block relative">
             <SearchIcon
               size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50"
             />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search notes"
-              className="rounded-lg border border-neutral-300 bg-white pl-8 pr-3 py-2 outline-none focus:border-neutral-500"
+              className="rounded-lg glass-input pl-8 pr-3 py-2 outline-none text-white placeholder-white/50"
             />
           </div>
         </div>
       </header>
 
-      <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm space-y-3">
+      <div className="rounded-xl glass p-4 space-y-3">
         <div className="flex gap-2">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="New tag name"
-            className="flex-1 rounded-lg border border-neutral-300 bg-white px-3 py-2 outline-none focus:border-neutral-500"
+            className="flex-1 rounded-lg glass-input px-3 py-2 outline-none text-white placeholder-white/50"
           />
           <button
             onClick={createTag}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 hover:bg-neutral-100"
+            className="rounded-lg glass-button px-3 py-2 text-white hover:bg-white/20"
           >
             Add
           </button>
         </div>
         {loading ? (
-          <div>Loading…</div>
+          <div className="text-white">Loading…</div>
         ) : tags.length === 0 ? (
-          <div>No tags yet.</div>
+          <div className="text-white">No tags yet.</div>
         ) : (
-          <ul className="divide-y divide-neutral-200">
+          <ul className="divide-y divide-white/20">
             {tags.map((t) => (
               <li key={t.id} className="flex items-center justify-between py-2">
                 <button
                   onClick={() => navigate(`/tags/${t.id}`)}
-                  className="text-left hover:underline"
+                  className="text-left hover:underline text-white"
                 >
                   {t.name}
                 </button>
                 <button
                   onClick={() => removeTag(t.id)}
-                  className="rounded-lg border border-neutral-300 bg-white px-3 py-1 text-sm hover:bg-neutral-100"
+                  className="rounded-lg glass-button px-3 py-1 text-sm text-white hover:bg-white/20"
                 >
                   Delete
                 </button>

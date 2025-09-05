@@ -1,7 +1,7 @@
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const { createClient } = require('@supabase/supabase-js');
+const express = require("express");
+const cors = require("cors");
+const dotenv = require("dotenv");
+const { createClient } = require("@supabase/supabase-js");
 
 // Load environment variables from .env
 dotenv.config();
@@ -15,38 +15,53 @@ const PORT = process.env.PORT || 3001;
 // Validate required env vars
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
-
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.error('Missing SUPABASE_URL or SUPABASE_ANON_KEY in environment.');
+  console.error("Missing SUPABASE_URL or SUPABASE_ANON_KEY in environment.");
 }
 
 // Create Supabase client
-const supabase = createClient(SUPABASE_URL || '', SUPABASE_ANON_KEY || '');
+const supabase = createClient(SUPABASE_URL || "", SUPABASE_ANON_KEY || "");
+const supabaseAdmin = createClient(
+  SUPABASE_URL || "",
+  SUPABASE_SERVICE_ROLE_KEY || ""
+);
 
 // Health route
-app.get('/health', (_req, res) => {
-  res.json({ ok: true, service: 'server', timestamp: new Date().toISOString() });
+app.get("/health", (_req, res) => {
+  res.json({
+    ok: true,
+    service: "server",
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Simple Supabase connectivity check (no table read)
-app.get('/status', async (_req, res) => {
+app.get("/status", async (_req, res) => {
   try {
     // A lightweight no-op request: get current user with no session always returns null but exercises client
     const { data, error } = await supabase.auth.getUser();
     if (error) {
       return res.status(500).json({ ok: false, error: error.message });
     }
-    return res.json({ ok: true, supabaseReachable: true, user: data?.user || null });
+    return res.json({
+      ok: true,
+      supabaseReachable: true,
+      user: data?.user || null,
+    });
   } catch (err) {
     return res.status(500).json({ ok: false, error: err.message });
   }
 });
 
 // Auth endpoints
-app.post('/auth/signup', async (req, res) => {
+app.post("/auth/signup", async (req, res) => {
   try {
     const { email, password } = req.body || {};
-    if (!email || !password) return res.status(400).json({ ok: false, error: 'Email and password required' });
+    if (!email || !password)
+      return res
+        .status(400)
+        .json({ ok: false, error: "Email and password required" });
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) return res.status(400).json({ ok: false, error: error.message });
     return res.status(201).json({ ok: true, data });
@@ -55,11 +70,17 @@ app.post('/auth/signup', async (req, res) => {
   }
 });
 
-app.post('/auth/login', async (req, res) => {
+app.post("/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body || {};
-    if (!email || !password) return res.status(400).json({ ok: false, error: 'Email and password required' });
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (!email || !password)
+      return res
+        .status(400)
+        .json({ ok: false, error: "Email and password required" });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
     if (error) return res.status(401).json({ ok: false, error: error.message });
     return res.json({ ok: true, data });
   } catch (err) {
@@ -67,7 +88,7 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 
-app.post('/auth/logout', async (req, res) => {
+app.post("/auth/logout", async (req, res) => {
   try {
     const supa = getSupabaseForRequest(req);
     const { error } = await supa.auth.signOut();
@@ -78,12 +99,13 @@ app.post('/auth/logout', async (req, res) => {
   }
 });
 
-app.get('/auth/google-url', async (req, res) => {
+app.get("/auth/google-url", async (req, res) => {
   try {
-    const redirectTo = req.query.redirect || `${req.protocol}://${req.get('host')}/health`;
+    const redirectTo =
+      req.query.redirect || `${req.protocol}://${req.get("host")}/health`;
     const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo }
+      provider: "google",
+      options: { redirectTo },
     });
     if (error) return res.status(400).json({ ok: false, error: error.message });
     return res.json({ ok: true, url: data.url });
@@ -94,12 +116,15 @@ app.get('/auth/google-url', async (req, res) => {
 
 // Helper: per-request Supabase client using user's JWT (Authorization: Bearer <token>)
 function getSupabaseForRequest(req) {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : undefined;
-  return createClient(SUPABASE_URL || '', SUPABASE_ANON_KEY || '', {
+  const authHeader = req.headers["authorization"];
+  const token =
+    authHeader && authHeader.startsWith("Bearer ")
+      ? authHeader.slice(7)
+      : undefined;
+  return createClient(SUPABASE_URL || "", SUPABASE_ANON_KEY || "", {
     global: {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    }
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    },
   });
 }
 
@@ -109,28 +134,31 @@ async function getUserIdOr401(req, res, supa) {
     return res.status(401).json({ ok: false, error: error.message });
   }
   if (!data?.user) {
-    return res.status(401).json({ ok: false, error: 'Unauthorized' });
+    return res.status(401).json({ ok: false, error: "Unauthorized" });
   }
   return data.user.id;
 }
 
 // Notes API
-app.get('/api/notes', async (req, res) => {
+app.get("/api/notes", async (req, res) => {
   try {
     const supa = getSupabaseForRequest(req);
     const userId = await getUserIdOr401(req, res, supa);
-    if (typeof userId !== 'string') return; // response already sent
+    if (typeof userId !== "string") return; // response already sent
 
     const { q, archived, pinned, starred } = req.query;
-    let query = supa.from('notes').select('*').order('created_at', { ascending: false });
-    if (typeof archived !== 'undefined') {
-      query = query.eq('is_archived', archived === 'true');
+    let query = supa
+      .from("notes")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (typeof archived !== "undefined") {
+      query = query.eq("is_archived", archived === "true");
     }
-    if (typeof pinned !== 'undefined') {
-      query = query.eq('is_pinned', pinned === 'true');
+    if (typeof pinned !== "undefined") {
+      query = query.eq("is_pinned", pinned === "true");
     }
-    if (typeof starred !== 'undefined') {
-      query = query.eq('is_starred', starred === 'true');
+    if (typeof starred !== "undefined") {
+      query = query.eq("is_starred", starred === "true");
     }
     if (q && String(q).trim().length > 0) {
       const term = String(q).trim();
@@ -146,15 +174,15 @@ app.get('/api/notes', async (req, res) => {
   }
 });
 
-app.post('/api/notes', async (req, res) => {
+app.post("/api/notes", async (req, res) => {
   try {
     const supa = getSupabaseForRequest(req);
     const userId = await getUserIdOr401(req, res, supa);
-    if (typeof userId !== 'string') return;
+    if (typeof userId !== "string") return;
 
     const { title, content, is_archived, is_pinned, color } = req.body || {};
     if (!title || String(title).trim().length === 0) {
-      return res.status(400).json({ ok: false, error: 'Title is required' });
+      return res.status(400).json({ ok: false, error: "Title is required" });
     }
 
     const insertPayload = {
@@ -163,10 +191,14 @@ app.post('/api/notes', async (req, res) => {
       content: content ?? null,
       is_archived: Boolean(is_archived) || false,
       is_pinned: Boolean(is_pinned) || false,
-      color: color ?? null
+      color: color ?? null,
     };
 
-    const { data, error } = await supa.from('notes').insert(insertPayload).select('*').single();
+    const { data, error } = await supa
+      .from("notes")
+      .insert(insertPayload)
+      .select("*")
+      .single();
     if (error) return res.status(400).json({ ok: false, error: error.message });
     return res.status(201).json({ ok: true, data });
   } catch (err) {
@@ -174,14 +206,18 @@ app.post('/api/notes', async (req, res) => {
   }
 });
 
-app.get('/api/notes/:id', async (req, res) => {
+app.get("/api/notes/:id", async (req, res) => {
   try {
     const supa = getSupabaseForRequest(req);
     const userId = await getUserIdOr401(req, res, supa);
-    if (typeof userId !== 'string') return;
+    if (typeof userId !== "string") return;
 
     const { id } = req.params;
-    const { data, error } = await supa.from('notes').select('*').eq('id', id).single();
+    const { data, error } = await supa
+      .from("notes")
+      .select("*")
+      .eq("id", id)
+      .single();
     if (error) return res.status(404).json({ ok: false, error: error.message });
     return res.json({ ok: true, data });
   } catch (err) {
@@ -190,42 +226,51 @@ app.get('/api/notes/:id', async (req, res) => {
 });
 
 // Get tags for a note
-app.get('/api/notes/:id/tags', async (req, res) => {
+app.get("/api/notes/:id/tags", async (req, res) => {
   try {
     const supa = getSupabaseForRequest(req);
     const userId = await getUserIdOr401(req, res, supa);
-    if (typeof userId !== 'string') return;
+    if (typeof userId !== "string") return;
 
     const { id } = req.params;
     const { data, error } = await supa
-      .from('note_tags')
-      .select('tags:tag_id ( id, name )')
-      .eq('note_id', id);
+      .from("note_tags")
+      .select("tags:tag_id ( id, name )")
+      .eq("note_id", id);
     if (error) return res.status(400).json({ ok: false, error: error.message });
-    const tags = (data || []).map(r => r.tags).filter(Boolean);
+    const tags = (data || []).map((r) => r.tags).filter(Boolean);
     return res.json({ ok: true, data: tags });
   } catch (err) {
     return res.status(500).json({ ok: false, error: err.message });
   }
 });
 
-app.put('/api/notes/:id', async (req, res) => {
+app.put("/api/notes/:id", async (req, res) => {
   try {
     const supa = getSupabaseForRequest(req);
     const userId = await getUserIdOr401(req, res, supa);
-    if (typeof userId !== 'string') return;
+    if (typeof userId !== "string") return;
 
     const { id } = req.params;
-    const { title, content, is_archived, is_pinned, is_starred, color } = req.body || {};
+    const { title, content, is_archived, is_pinned, is_starred, color } =
+      req.body || {};
     const updatePayload = {};
-    if (typeof title !== 'undefined') updatePayload.title = title;
-    if (typeof content !== 'undefined') updatePayload.content = content;
-    if (typeof is_archived !== 'undefined') updatePayload.is_archived = Boolean(is_archived);
-    if (typeof is_pinned !== 'undefined') updatePayload.is_pinned = Boolean(is_pinned);
-    if (typeof is_starred !== 'undefined') updatePayload.is_starred = Boolean(is_starred);
-    if (typeof color !== 'undefined') updatePayload.color = color;
+    if (typeof title !== "undefined") updatePayload.title = title;
+    if (typeof content !== "undefined") updatePayload.content = content;
+    if (typeof is_archived !== "undefined")
+      updatePayload.is_archived = Boolean(is_archived);
+    if (typeof is_pinned !== "undefined")
+      updatePayload.is_pinned = Boolean(is_pinned);
+    if (typeof is_starred !== "undefined")
+      updatePayload.is_starred = Boolean(is_starred);
+    if (typeof color !== "undefined") updatePayload.color = color;
 
-    const { data, error } = await supa.from('notes').update(updatePayload).eq('id', id).select('*').single();
+    const { data, error } = await supa
+      .from("notes")
+      .update(updatePayload)
+      .eq("id", id)
+      .select("*")
+      .single();
     if (error) return res.status(400).json({ ok: false, error: error.message });
     return res.json({ ok: true, data });
   } catch (err) {
@@ -233,15 +278,17 @@ app.put('/api/notes/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/notes/:id', async (req, res) => {
+app.delete("/api/notes/:id", async (req, res) => {
   try {
     const supa = getSupabaseForRequest(req);
     const userId = await getUserIdOr401(req, res, supa);
-    if (typeof userId !== 'string') return;
+    if (typeof userId !== "string") return;
 
     const { id } = req.params;
-    const { error } = await supa.from('notes').delete().eq('id', id);
+    const { error } = await supa.from("notes").delete().eq("id", id);
+
     if (error) return res.status(400).json({ ok: false, error: error.message });
+
     return res.json({ ok: true });
   } catch (err) {
     return res.status(500).json({ ok: false, error: err.message });
@@ -249,13 +296,16 @@ app.delete('/api/notes/:id', async (req, res) => {
 });
 
 // Tags API
-app.get('/api/tags', async (req, res) => {
+app.get("/api/tags", async (req, res) => {
   try {
     const supa = getSupabaseForRequest(req);
     const userId = await getUserIdOr401(req, res, supa);
-    if (typeof userId !== 'string') return;
+    if (typeof userId !== "string") return;
 
-    const { data, error } = await supa.from('tags').select('*').order('name', { ascending: true });
+    const { data, error } = await supa
+      .from("tags")
+      .select("*")
+      .order("name", { ascending: true });
     if (error) return res.status(400).json({ ok: false, error: error.message });
     return res.json({ ok: true, data });
   } catch (err) {
@@ -263,18 +313,22 @@ app.get('/api/tags', async (req, res) => {
   }
 });
 
-app.post('/api/tags', async (req, res) => {
+app.post("/api/tags", async (req, res) => {
   try {
     const supa = getSupabaseForRequest(req);
     const userId = await getUserIdOr401(req, res, supa);
-    if (typeof userId !== 'string') return;
+    if (typeof userId !== "string") return;
 
     const { name } = req.body || {};
     if (!name || String(name).trim().length === 0) {
-      return res.status(400).json({ ok: false, error: 'Tag name is required' });
+      return res.status(400).json({ ok: false, error: "Tag name is required" });
     }
 
-    const { data, error } = await supa.from('tags').insert({ user_id: userId, name }).select('*').single();
+    const { data, error } = await supa
+      .from("tags")
+      .insert({ user_id: userId, name })
+      .select("*")
+      .single();
     if (error) return res.status(400).json({ ok: false, error: error.message });
     return res.status(201).json({ ok: true, data });
   } catch (err) {
@@ -282,14 +336,14 @@ app.post('/api/tags', async (req, res) => {
   }
 });
 
-app.delete('/api/tags/:id', async (req, res) => {
+app.delete("/api/tags/:id", async (req, res) => {
   try {
     const supa = getSupabaseForRequest(req);
     const userId = await getUserIdOr401(req, res, supa);
-    if (typeof userId !== 'string') return;
+    if (typeof userId !== "string") return;
 
     const { id } = req.params;
-    const { error } = await supa.from('tags').delete().eq('id', id);
+    const { error } = await supa.from("tags").delete().eq("id", id);
     if (error) return res.status(400).json({ ok: false, error: error.message });
     return res.json({ ok: true });
   } catch (err) {
@@ -298,20 +352,22 @@ app.delete('/api/tags/:id', async (req, res) => {
 });
 
 // Link tags to a note
-app.post('/api/notes/:id/tags', async (req, res) => {
+app.post("/api/notes/:id/tags", async (req, res) => {
   try {
     const supa = getSupabaseForRequest(req);
     const userId = await getUserIdOr401(req, res, supa);
-    if (typeof userId !== 'string') return;
+    if (typeof userId !== "string") return;
 
     const { id } = req.params;
     const { tagIds } = req.body || {};
     if (!Array.isArray(tagIds) || tagIds.length === 0) {
-      return res.status(400).json({ ok: false, error: 'tagIds must be a non-empty array' });
+      return res
+        .status(400)
+        .json({ ok: false, error: "tagIds must be a non-empty array" });
     }
 
-    const rows = tagIds.map(tid => ({ note_id: id, tag_id: tid }));
-    const { error } = await supa.from('note_tags').insert(rows);
+    const rows = tagIds.map((tid) => ({ note_id: id, tag_id: tid }));
+    const { error } = await supa.from("note_tags").insert(rows);
     if (error) return res.status(400).json({ ok: false, error: error.message });
     return res.status(201).json({ ok: true });
   } catch (err) {
@@ -320,14 +376,17 @@ app.post('/api/notes/:id/tags', async (req, res) => {
 });
 
 // Unlink a tag from a note
-app.delete('/api/notes/:noteId/tags/:tagId', async (req, res) => {
+app.delete("/api/notes/:noteId/tags/:tagId", async (req, res) => {
   try {
     const supa = getSupabaseForRequest(req);
     const userId = await getUserIdOr401(req, res, supa);
-    if (typeof userId !== 'string') return;
+    if (typeof userId !== "string") return;
 
     const { noteId, tagId } = req.params;
-    const { error } = await supa.from('note_tags').delete().match({ note_id: noteId, tag_id: tagId });
+    const { error } = await supa
+      .from("note_tags")
+      .delete()
+      .match({ note_id: noteId, tag_id: tagId });
     if (error) return res.status(400).json({ ok: false, error: error.message });
     return res.json({ ok: true });
   } catch (err) {
@@ -336,36 +395,163 @@ app.delete('/api/notes/:noteId/tags/:tagId', async (req, res) => {
 });
 
 // Notes by tag
-app.get('/api/tags/:tagId/notes', async (req, res) => {
+app.get("/api/tags/:tagId/notes", async (req, res) => {
   try {
     const supa = getSupabaseForRequest(req);
     const userId = await getUserIdOr401(req, res, supa);
-    if (typeof userId !== 'string') return;
+    if (typeof userId !== "string") return;
 
     const { tagId } = req.params;
     const { q } = req.query;
     let query = supa
-      .from('note_tags')
-      .select('notes:note_id ( id, title, content, created_at, is_pinned, is_starred )')
-      .eq('tag_id', tagId);
+      .from("note_tags")
+      .select(
+        "notes:note_id ( id, title, content, created_at, is_pinned, is_starred )"
+      )
+      .eq("tag_id", tagId);
 
     const { data, error } = await query;
     if (error) return res.status(400).json({ ok: false, error: error.message });
-    let notes = (data || []).map(r => r.notes).filter(Boolean);
+    let notes = (data || []).map((r) => r.notes).filter(Boolean);
     if (q && String(q).trim().length > 0) {
       const term = String(q).toLowerCase();
-      notes = notes.filter(n =>
-        (n.title || '').toLowerCase().includes(term) ||
-        (n.content || '').toLowerCase().includes(term)
+      notes = notes.filter(
+        (n) =>
+          (n.title || "").toLowerCase().includes(term) ||
+          (n.content || "").toLowerCase().includes(term)
       );
     }
     // sort pinned first, then newest
     notes.sort((a, b) => {
       const pb = (b.is_pinned ? 1 : 0) - (a.is_pinned ? 1 : 0);
       if (pb !== 0) return pb;
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      return (
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
     });
     return res.json({ ok: true, data: notes });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// Delete Account - Delete all user data
+app.delete("/api/account", async (req, res) => {
+  try {
+    const supa = getSupabaseForRequest(req);
+    const userId = await getUserIdOr401(req, res, supa);
+    if (typeof userId !== "string") return;
+
+    // Start a transaction-like operation by deleting in the correct order
+    // to avoid foreign key constraint issues
+
+    // 1. First, get all note IDs for the user
+    const { data: userNotes, error: notesFetchError } = await supa
+      .from("notes")
+      .select("id")
+      .eq("user_id", userId);
+
+    if (notesFetchError) {
+      console.error("Error fetching user notes:", notesFetchError);
+      return res
+        .status(500)
+        .json({ ok: false, error: "Failed to fetch user notes" });
+    }
+
+    const noteIds = userNotes?.map((note) => note.id) || [];
+
+    // 2. Delete all note_tags relationships for user's notes
+    if (noteIds.length > 0) {
+      const { error: noteTagsError } = await supa
+        .from("note_tags")
+        .delete()
+        .in("note_id", noteIds);
+
+      if (noteTagsError) {
+        console.error("Error deleting note_tags:", noteTagsError);
+        return res
+          .status(500)
+          .json({ ok: false, error: "Failed to delete note relationships" });
+      }
+    }
+
+    // 4. Delete all tags belonging to the user
+    const { error: tagsError } = await supa
+      .from("tags")
+      .delete()
+      .eq("user_id", userId);
+
+    if (tagsError) {
+      console.error("Error deleting tags:", tagsError);
+      return res
+        .status(500)
+        .json({ ok: false, error: "Failed to delete tags" });
+    }
+    const { data, error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    if (error) {
+      console.error("Error deleting user:", error);
+      return res
+        .status(500)
+        .json({ ok: false, error: "Failed to delete user" });
+    }
+
+    // 5. Log successful deletion
+    console.log(
+      `User ${userId} data deleted successfully. Auth deletion should be handled client-side.`
+    );
+
+    return res.json({
+      ok: true,
+      message: "Account and all associated data deleted successfully",
+      deletedData: {
+        notes: noteIds.length,
+        noteTags: noteIds.length > 0 ? "deleted" : "none",
+        tags: "deleted",
+      },
+    });
+  } catch (err) {
+    console.error("Unexpected error during account deletion:", err);
+    return res.status(500).json({
+      ok: false,
+      error: "An unexpected error occurred during account deletion",
+    });
+  }
+});
+
+// Get account deletion status/confirmation
+app.get("/api/account/deletion-status", async (req, res) => {
+  try {
+    const supa = getSupabaseForRequest(req);
+    const userId = await getUserIdOr401(req, res, supa);
+    if (typeof userId !== "string") return;
+
+    // Get counts of user data for confirmation
+    const [notesResult, tagsResult] = await Promise.all([
+      supa
+        .from("notes")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId),
+      supa
+        .from("tags")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId),
+    ]);
+
+    const notesCount = notesResult.count || 0;
+    const tagsCount = tagsResult.count || 0;
+
+    return res.json({
+      ok: true,
+      data: {
+        userId,
+        dataSummary: {
+          notes: notesCount,
+          tags: tagsCount,
+          totalItems: notesCount + tagsCount,
+        },
+        message: `Account contains ${notesCount} notes and ${tagsCount} tags`,
+      },
+    });
   } catch (err) {
     return res.status(500).json({ ok: false, error: err.message });
   }
@@ -374,5 +560,3 @@ app.get('/api/tags/:tagId/notes', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server listening on http://localhost:${PORT}`);
 });
-
-

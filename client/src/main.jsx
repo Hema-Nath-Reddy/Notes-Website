@@ -14,6 +14,7 @@ import Account from "./pages/Account.jsx";
 import { RequireAuth, RequireGuest } from "./routes/Guards.jsx";
 import Starred from "./pages/Starred.jsx";
 import TagNotes from "./pages/TagNotes.jsx";
+import DeleteAccount from "./pages/DeleteAccount.jsx";
 
 const router = createBrowserRouter([
   {
@@ -26,26 +27,46 @@ const router = createBrowserRouter([
       { path: "*", element: <NotFound /> },
       { path: "/starred", element: <Starred /> },
       { path: "/tags/:tagId", element: <TagNotes /> },
-      { path: "/account", element: (
-        <RequireAuth>
-          <Account />
-        </RequireAuth>
-      ) },
-      { path: "/login", element: (
-        <RequireGuest>
-          <Login />
-        </RequireGuest>
-      ) },
-      { path: "/signup", element: (
-        <RequireGuest>
-          <Signup />
-        </RequireGuest>
-      ) },
-      { path: "/logout", element: (
-        <RequireAuth>
-          <Logout />
-        </RequireAuth>
-      ) },
+      {
+        path: "/account",
+        element: (
+          <RequireAuth>
+            <Account />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "/login",
+        element: (
+          <RequireGuest>
+            <Login />
+          </RequireGuest>
+        ),
+      },
+      {
+        path: "/signup",
+        element: (
+          <RequireGuest>
+            <Signup />
+          </RequireGuest>
+        ),
+      },
+      {
+        path: "/logout",
+        element: (
+          <RequireAuth>
+            <Logout />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "/delete-account",
+        element: (
+          <RequireAuth>
+            <DeleteAccount />
+          </RequireAuth>
+        ),
+      },
     ],
   },
 ]);

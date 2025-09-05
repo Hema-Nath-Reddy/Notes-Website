@@ -262,20 +262,20 @@ export default function NotesList() {
     <section className="space-y-4">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">All Notes</h1>
-          <p className="text-neutral-600">Your latest notes appear here.</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-white">All Notes</h1>
+          <p className="text-white/70">Your latest notes appear here.</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="hidden sm:block relative">
             <SearchIcon
               size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50"
             />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search notes"
-              className="rounded-lg border border-neutral-300 bg-white pl-8 pr-3 py-2 outline-none focus:border-neutral-500"
+              className="rounded-lg glass-input pl-8 pr-3 py-2 outline-none text-white placeholder-white/50"
             />
           </div>
         </div>
@@ -286,7 +286,7 @@ export default function NotesList() {
         <ResizableGridCard rowHeight={ROW_HEIGHT}>
           <div
             ref={composerRef}
-            className="rounded-xl border-2 border-dashed border-neutral-300 bg-white p-4 shadow-sm overflow-auto min-h-[160px]"
+            className="rounded-xl glass border-2 border-dashed border-white/30 p-4 overflow-auto min-h-[160px]"
           >
             {isLoggedIn ? (
               <div className="space-y-3">
@@ -294,27 +294,27 @@ export default function NotesList() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Title"
-                  className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 outline-none focus:border-neutral-500"
+                  className="w-full rounded-lg glass-input px-3 py-2 outline-none text-white placeholder-white/50"
                 />
                 <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   placeholder="Write your note..."
                   rows={5}
-                  className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 outline-none focus:border-neutral-500"
+                  className="w-full rounded-lg glass-input px-3 py-2 outline-none text-white placeholder-white/50"
                 />
                 <div className="space-y-2">
-                  <div className="text-sm font-medium">Tags</div>
+                  <div className="text-sm font-medium text-white">Tags</div>
                   <div className="flex flex-wrap gap-2">
                     {tags.map((t) => (
                       <button
                         key={t.id}
                         type="button"
                         onClick={() => toggleTag(t.id)}
-                        className={`rounded-full border px-3 py-1 text-sm ${
+                        className={`rounded-full border px-3 py-1 text-sm transition-all ${
                           selectedTagIds.includes(t.id)
-                            ? "cursor-pointer bg-black text-white border-black"
-                            : "cursor-pointer bg-white border-neutral-300 hover:bg-neutral-100"
+                            ? "cursor-pointer glass-button-primary text-white"
+                            : "cursor-pointer glass-button text-white hover:bg-white/20"
                         }`}
                       >
                         {t.name}
@@ -326,26 +326,26 @@ export default function NotesList() {
                       value={newTag}
                       onChange={(e) => setNewTag(e.target.value)}
                       placeholder="New tag name"
-                      className="flex-1 rounded-lg border border-neutral-300 bg-white px-3 py-2 outline-none focus:border-neutral-500"
+                      className="flex-1 rounded-lg glass-input px-3 py-2 outline-none text-white placeholder-white/50"
                     />
                     <button
                       type="button"
                       onClick={handleAddTag}
-                      className="cursor-pointer rounded-lg border border-neutral-300 bg-white px-3 py-2 hover:bg-neutral-100"
+                      className="cursor-pointer rounded-lg glass-button px-3 py-2 text-white hover:bg-white/20"
                     >
                       <PlusCircle size={16} />
                     </button>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="text-xs text-neutral-500">
+                  <div className="text-xs text-white/50">
                     Click anywhere outside to save
                   </div>
                   <button
                     type="button"
                     onClick={handleCreateNote}
                     disabled={submitting}
-                    className="cursor-pointer rounded-lg bg-black px-3 py-2 text-white disabled:opacity-60"
+                    className="cursor-pointer rounded-lg glass-button-primary px-3 py-2 text-white disabled:opacity-60"
                   >
                     {submitting ? "Saving…" : <Save size={16} />}
                   </button>
@@ -359,8 +359,8 @@ export default function NotesList() {
                 }}
                 className="cursor-pointer w-full h-full text-left"
               >
-                <h2 className="font-medium">Log in to create a note</h2>
-                <p className="text-sm text-neutral-600">Tap to go to login.</p>
+                <h2 className="font-medium text-white">Log in to create a note</h2>
+                <p className="text-sm text-white/70">Tap to go to login.</p>
               </button>
             )}
           </div>
@@ -368,18 +368,18 @@ export default function NotesList() {
 
         {/* Existing notes */}
         {loadingNotes ? (
-          <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-            Loading…
+          <div className="rounded-xl glass p-4">
+            <span className="text-white">Loading…</span>
           </div>
         ) : notes.length === 0 ? (
-          <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-            No notes yet.
+          <div className="rounded-xl glass p-4">
+            <span className="text-white">No notes yet.</span>
           </div>
         ) : (
           notes.map((n) => (
             <ResizableGridCard key={n.id} rowHeight={ROW_HEIGHT}>
               <div
-                className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm overflow-auto min-h-[160px]"
+                className="rounded-xl glass p-4 overflow-auto min-h-[160px] cursor-pointer hover:bg-white/10 transition-all"
                 draggable
                 onDragStart={(e) => onDragStart(e, n.id, n.is_pinned)}
                 onDragOver={onDragOver}
@@ -388,15 +388,15 @@ export default function NotesList() {
                 onClick={() => navigate(`/notes/${n.id}`)}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <h2 className="font-medium truncate">{n.title}</h2>
+                  <h2 className="font-medium truncate text-white">{n.title}</h2>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => toggleStar(n.id, !n.is_starred)}
-                      className={`rounded-full border p-1 ${
+                      className={`rounded-full border p-1 transition-all ${
                         n.is_starred
-                          ? "cursor-pointer bg-yellow-400 text-black border-yellow-400"
-                          : "cursor-pointer bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100"
+                          ? "cursor-pointer glass-button-primary text-white"
+                          : "cursor-pointer glass-button text-white hover:bg-white/20"
                       }`}
                       title={n.is_starred ? "Unstar" : "Star"}
                     >
@@ -409,10 +409,10 @@ export default function NotesList() {
                     <button
                       type="button"
                       onClick={() => togglePin(n.id, !n.is_pinned)}
-                      className={`rounded-full border p-1 ${
+                      className={`rounded-full border p-1 transition-all ${
                         n.is_pinned
-                          ? "cursor-pointer bg-black text-white border-black"
-                          : "cursor-pointer bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100"
+                          ? "cursor-pointer glass-button-primary text-white"
+                          : "cursor-pointer glass-button text-white hover:bg-white/20"
                       }`}
                       title={n.is_pinned ? "Unpin" : "Pin"}
                     >
@@ -425,7 +425,7 @@ export default function NotesList() {
                   </div>
                 </div>
                 {n.content && (
-                  <p className="text-sm text-neutral-600 whitespace-pre-wrap">
+                  <p className="text-sm text-white/70 whitespace-pre-wrap">
                     {n.content}
                   </p>
                 )}
